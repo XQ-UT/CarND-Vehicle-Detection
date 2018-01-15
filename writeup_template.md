@@ -141,8 +141,56 @@ We used different sliding window scales for different regions in a image. We use
 
 ## False Positive Prevention
 
+Although we have SVM classifier with more than 99% accuracy, we will have hundreds sliding windows for a single image, in which case a lots of false positives will be generated for video processing. To overcome this, we will use heatmap to count how many windows are detected on a given region and then apply a threshold to filter out some detected region with lower heat.
+```scipy.ndimage.measurements.label``` function will be used to get connected components of the heatmap and a final bounding box will be drawn around those components. Some examples are shown in Figure 6.
+
+<p align="center">
+  <img src="report_images/heatmap.jpg" width="1000" height="300"/>
+  <br>
+  <em>Figure 6: Processing Pipeline with Heatmap</em>
+</p>
+
+
 ## Process Video
 
+The processed video can be found [here](https://github.com/XQ-UT/CarND-Vehicle-Detection/blob/master/output_video/project_video.mp4).
+
+During the video processing, we still found a lot of false positives and bounding boxes were jittering. To smooth the jitter and reduce false positives, we used a queue with size 10 to store the previous 10 frames' bounding boxes. Then we applied higher threshold to filter false positive and averaged the drawn bounding boxes. The processing function was defined as below.
+
+```python
+bboxes_queue = []
+bboxes_queue_capacity = 10
+false_positive_threshold = 20
+
+def detect_cars_for_video_frame(video_img):    
+    bboxes_small = find_cars_bboxes(video_img, 
+                              ystart = 400, ystop = 500, scale = 1, cells_per_step = 1,
+                              svc = svm_clf, X_scaler = X_scaler,
+                              orient = 9, pix_per_cell = 8, cell_per_block = 2,
+                              spatial_size = (32, 32),
+                              hist_bins = 32
+                             )
+    bboxes_large = find_cars_bboxes(video_img, 
+                          ystart = 400, ystop = 656, scale = 2, cells_per_step = 1,
+                          svc = svm_clf, X_scaler = X_scaler,
+                          orient = 9, pix_per_cell = 8, cell_per_block = 2,
+                          spatial_size = (32, 32),
+                          hist_bins = 32
+                         )
+    single_frame_bboxes = bboxes_small + bboxes_large
+    
+    if len(bboxes_queue) == bboxes_queue_capacity:
+        bboxes_queue.pop(0)
+    bboxes_queue.append(single_frame_bboxes)
+    bboxes_accumulated = [bbox for bboxes in bboxes_queue for bbox in bboxes]
+    
+    heatmap = get_heatmap(video_img, bboxes_accumulated)
+    heatmap = apply_threshold(heatmap, false_positive_threshold)
+    labels = label(heatmap)
+    result_img = draw_labeled_bboxes(video_img, labels)
+    
+    return result_img
+```
 ## Discussion
 
 
