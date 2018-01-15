@@ -193,8 +193,15 @@ def detect_cars_for_video_frame(video_img):
 ```
 ## Discussion
 
+When we first implemented the classifier, we used RGB color space and only gray hog feature. The classifer only achieved 97% accuracy. So we had a lot of false positives, as shown in Figure 7. Then we used ```YCrCb``` color space and extracted hog features from all the three channels. Then the model accuracy was improved to 99.28%.
 
+<p align="center">
+  <img src="report_images/problem.jpg" width="1000" height="200"/>
+  <br>
+  <em>Figure 7: False Positive Example</em>
+</p>
 
+One limitation of this pipeline is that it may not be able to detect 2 cars when the 2 cars overlapped in the image. Also, different light conditions may affect the model accuracy and cause false positives.
 
 
 
