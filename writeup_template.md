@@ -24,6 +24,7 @@ The datasets we use are comprised of images taken from the GTI vehicle image dat
 | Non Car       | 6008          | 2960          |
 | Total         | 11898         | 5862          |
 
+We show two example images in Figure 1.
 <p align="center">
   <img src="report_images/example_images.jpg" width="600" height="300"/>
   <br>
@@ -114,6 +115,16 @@ The hog features for car image and non car image are shown in Figure 3.
 
 
 ## Training Classifier
+
+To train a vehicle classifier, we used linear SVM and concatenate all the color spatial, color histogram and hog features. The length of feature vector is **8460**. Then the feature vector will be normalized by ```sklearn.preprocessing.StandardScaler```. We show one normalized example below.
+
+<p align="center">
+  <img src="report_images/feature_normalization.jpg" width="1000" height="300"/>
+  <br>
+  <em>Figure 4: Feature Normalization</em>
+</p>
+
+We used ```sklearn.model_selection.GridSearchCV``` to tune the model and got ```training accuracy = 1.0``` and ```test accuracty = 0.9922```. 
 
 ## Sliding Window
 
